@@ -112,6 +112,12 @@ pub fn install_git_skill<R: tauri::Runtime>(
     }
 
     // Fast path: for GitHub URLs with a subpath, download via API instead of cloning.
+    let github_token = store.get_setting("github_token")?.unwrap_or_default();
+    let github_token_opt = if github_token.is_empty() {
+        None
+    } else {
+        Some(github_token.as_str())
+    };
     let revision;
     if let Some((owner, repo, branch, subpath)) = parse_github_api_params(
         &parsed.clone_url,
@@ -124,7 +130,15 @@ pub fn install_git_skill<R: tauri::Runtime>(
             repo,
             subpath
         );
-        match download_github_directory(&owner, &repo, &branch, &subpath, &central_path, cancel) {
+        match download_github_directory(
+            &owner,
+            &repo,
+            &branch,
+            &subpath,
+            &central_path,
+            cancel,
+            github_token_opt,
+        ) {
             Ok(()) => {
                 revision = format!("api-download-{}", branch);
             }

@@ -84,6 +84,10 @@ export const resources = {
       gitCacheTtlSecs: 'Git cache freshness (seconds)',
       gitCacheTtlHint:
         'Skip git fetch when the cache was updated within this window. Set to 0 to always fetch.',
+      githubToken: 'GitHub Token',
+      githubTokenPlaceholder: 'ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+      githubTokenHint:
+        'Optional. Set a GitHub personal access token to increase API rate limits from 60/hr to 5,000/hr.',
       appUpdates: 'App updates',
       updateHint: 'Click “Check” to look for updates.',
       checkForUpdates: 'Check',
@@ -373,6 +377,10 @@ export const resources = {
       gitCacheTtlSecs: 'Git 缓存新鲜期（秒）',
       gitCacheTtlHint:
         '在该时间窗口内命中缓存会跳过 fetch，设为 0 表示每次都拉取。',
+      githubToken: 'GitHub Token',
+      githubTokenPlaceholder: 'ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+      githubTokenHint:
+        '可选。设置 GitHub 个人访问令牌，可将 API 速率限制从 60 次/小时提升到 5,000 次/小时。',
       appUpdates: '应用更新',
       updateHint: '点击“检查更新”获取最新版本。',
       checkForUpdates: '检查更新',

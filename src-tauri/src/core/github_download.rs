@@ -32,6 +32,7 @@ pub fn download_github_directory(
     path: &str,
     dest: &Path,
     cancel: Option<&CancelToken>,
+    token: Option<&str>,
 ) -> Result<()> {
     let client = Client::builder()
         .timeout(std::time::Duration::from_secs(30))
@@ -40,9 +41,10 @@ pub fn download_github_directory(
 
     std::fs::create_dir_all(dest).with_context(|| format!("create directory {:?}", dest))?;
 
-    download_dir_recursive(&client, owner, repo, branch, path, dest, cancel)
+    download_dir_recursive(&client, owner, repo, branch, path, dest, cancel, token)
 }
 
+#[allow(clippy::too_many_arguments)]
 fn download_dir_recursive(
     client: &Client,
     owner: &str,
@@ -51,6 +53,7 @@ fn download_dir_recursive(
     path: &str,
     dest: &Path,
     cancel: Option<&CancelToken>,
+    token: Option<&str>,
 ) -> Result<()> {
     if cancel.is_some_and(|c| c.is_cancelled()) {
         anyhow::bail!("CANCELLED|操作已被用户取消。");
@@ -61,10 +64,14 @@ fn download_dir_recursive(
         owner, repo, path, branch
     );
 
-    let resp = client
+    let mut req = client
         .get(&url)
         .header("User-Agent", "skills-hub")
-        .header("Accept", "application/vnd.github.v3+json")
+        .header("Accept", "application/vnd.github.v3+json");
+    if let Some(t) = token {
+        req = req.header("Authorization", format!("Bearer {}", t));
+    }
+    let resp = req
         .send()
         .with_context(|| format!("request GitHub contents: {}", url))?
         .error_for_status()
@@ -88,9 +95,11 @@ fn download_dir_recursive(
                         std::fs::create_dir_all(parent)
                             .with_context(|| format!("create parent dir {:?}", parent))?;
                     }
-                    let bytes = client
-                        .get(download_url)
-                        .header("User-Agent", "skills-hub")
+                    let mut file_req = client.get(download_url).header("User-Agent", "skills-hub");
+                    if let Some(t) = token {
+                        file_req = file_req.header("Authorization", format!("Bearer {}", t));
+                    }
+                    let bytes = file_req
                         .send()
                         .with_context(|| format!("download file: {}", item.path))?
                         .error_for_status()
@@ -111,6 +120,7 @@ fn download_dir_recursive(
                     &item.path,
                     &local_path,
                     cancel,
+                    token,
                 )?;
             }
             _ => {

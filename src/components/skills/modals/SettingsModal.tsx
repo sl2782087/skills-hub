@@ -9,12 +9,14 @@ type SettingsModalProps = {
   gitCacheCleanupDays: number
   gitCacheTtlSecs: number
   themePreference: 'system' | 'light' | 'dark'
+  githubToken: string
   onPickStoragePath: () => void
   onToggleLanguage: () => void
   onThemeChange: (nextTheme: 'system' | 'light' | 'dark') => void
   onGitCacheCleanupDaysChange: (nextDays: number) => void
   onGitCacheTtlSecsChange: (nextSecs: number) => void
   onClearGitCacheNow: () => void
+  onGithubTokenChange: (token: string) => void
   onRequestClose: () => void
   t: TFunction
 }
@@ -33,9 +35,16 @@ const SettingsModal = ({
   onGitCacheCleanupDaysChange,
   onGitCacheTtlSecsChange,
   onClearGitCacheNow,
+  githubToken,
+  onGithubTokenChange,
   onRequestClose,
   t,
 }: SettingsModalProps) => {
+  const [localToken, setLocalToken] = useState(githubToken)
+  useEffect(() => {
+    setLocalToken(githubToken)
+  }, [githubToken])
+
   const [appVersion, setAppVersion] = useState<string | null>(null)
   const versionText = useMemo(() => {
     if (!isTauri) return t('notAvailable')
@@ -234,6 +243,28 @@ const SettingsModal = ({
               />
             </div>
             <div className="settings-helper">{t('gitCacheTtlHint')}</div>
+          </div>
+
+          <div className="settings-field">
+            <label className="settings-label" htmlFor="settings-github-token">
+              {t('githubToken')}
+            </label>
+            <div className="settings-input-row">
+              <input
+                id="settings-github-token"
+                className="settings-input mono"
+                type="password"
+                placeholder={t('githubTokenPlaceholder')}
+                value={localToken}
+                onChange={(e) => setLocalToken(e.target.value)}
+                onBlur={() => {
+                  if (localToken !== githubToken) {
+                    onGithubTokenChange(localToken)
+                  }
+                }}
+              />
+            </div>
+            <div className="settings-helper">{t('githubTokenHint')}</div>
           </div>
 
           <div className="settings-version">

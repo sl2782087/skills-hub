@@ -333,6 +333,13 @@ function App() {
   }, [isTauri, invokeTauri])
 
   useEffect(() => {
+    if (!isTauri) return
+    invokeTauri<string>('get_github_token')
+      .then((token) => setGithubToken(token))
+      .catch(() => {})
+  }, [isTauri, invokeTauri])
+
+  useEffect(() => {
     if (isTauri) {
       void loadPlan()
     }
@@ -437,6 +444,7 @@ function App() {
   const [storagePath, setStoragePath] = useState<string>(t('notAvailable'))
   const [gitCacheCleanupDays, setGitCacheCleanupDays] = useState<number>(30)
   const [gitCacheTtlSecs, setGitCacheTtlSecs] = useState<number>(60)
+  const [githubToken, setGithubToken] = useState<string>('')
   const handlePickStoragePath = useCallback(async () => {
     try {
       if (!isTauri) {
@@ -484,6 +492,18 @@ function App() {
           secs: normalized,
         })
         setGitCacheTtlSecs(updated)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err))
+      }
+    },
+    [invokeTauri, isTauri],
+  )
+  const handleGithubTokenChange = useCallback(
+    async (nextToken: string) => {
+      setGithubToken(nextToken)
+      if (!isTauri) return
+      try {
+        await invokeTauri('set_github_token', { token: nextToken })
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err))
       }
@@ -1872,6 +1892,8 @@ function App() {
         onGitCacheCleanupDaysChange={handleGitCacheCleanupDaysChange}
         onGitCacheTtlSecsChange={handleGitCacheTtlSecsChange}
         onClearGitCacheNow={handleClearGitCacheNow}
+        githubToken={githubToken}
+        onGithubTokenChange={handleGithubTokenChange}
         onRequestClose={handleCloseSettings}
         t={t}
       />

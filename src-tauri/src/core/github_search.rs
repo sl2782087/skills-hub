@@ -27,14 +27,19 @@ pub struct RepoSummary {
     pub clone_url: String,
 }
 
-pub fn search_github_repos(query: &str, limit: usize) -> Result<Vec<RepoSummary>> {
-    search_github_repos_inner("https://api.github.com", query, limit)
+pub fn search_github_repos(
+    query: &str,
+    limit: usize,
+    token: Option<&str>,
+) -> Result<Vec<RepoSummary>> {
+    search_github_repos_inner("https://api.github.com", query, limit, token)
 }
 
 fn search_github_repos_inner(
     base_url: &str,
     query: &str,
     limit: usize,
+    token: Option<&str>,
 ) -> Result<Vec<RepoSummary>> {
     let client = Client::new();
     let base_url = base_url.trim_end_matches('/');
@@ -45,9 +50,11 @@ fn search_github_repos_inner(
         limit.clamp(1, 50)
     );
 
-    let response = client
-        .get(url)
-        .header("User-Agent", "skills-hub")
+    let mut req = client.get(url).header("User-Agent", "skills-hub");
+    if let Some(t) = token {
+        req = req.header("Authorization", format!("Bearer {}", t));
+    }
+    let response = req
         .send()
         .context("GitHub search request failed")?
         .error_for_status()
