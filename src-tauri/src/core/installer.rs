@@ -424,21 +424,74 @@ fn derive_name_from_repo_url(repo_url: &str) -> String {
     }
 }
 
+/// Scan base directories used for skill discovery.
+const SKILL_SCAN_BASES: [&str; 5] = [
+    "skills",
+    "skills/.curated",
+    "skills/.experimental",
+    "skills/.system",
+    ".claude/skills",
+];
+
+/// Check if a directory is a valid skill (has SKILL.md or is under .claude/skills/).
+fn is_skill_dir(p: &Path) -> bool {
+    p.is_dir() && (p.join("SKILL.md").exists() || is_claude_skill_dir(p))
+}
+
+/// Check if a directory is a Claude plugin skill (under .claude/skills/ without SKILL.md).
+fn is_claude_skill_dir(p: &Path) -> bool {
+    // A directory under .claude/skills/ is treated as a valid skill even without SKILL.md
+    if let Some(parent) = p.parent() {
+        let parent_str = parent.to_string_lossy();
+        if parent_str.ends_with(".claude/skills") || parent_str.ends_with(".claude\\skills") {
+            return p.is_dir();
+        }
+    }
+    false
+}
+
+/// Try to read the description for a skill from .claude-plugin/plugin.json.
+fn read_plugin_description(repo_dir: &Path) -> Option<String> {
+    let plugin_json = repo_dir.join(".claude-plugin/plugin.json");
+    if !plugin_json.exists() {
+        return None;
+    }
+    let content = std::fs::read_to_string(&plugin_json).ok()?;
+    let json: serde_json::Value = serde_json::from_str(&content).ok()?;
+    json.get("description")
+        .and_then(|v| v.as_str())
+        .map(|s| s.to_string())
+}
+
+/// Extract name and description for a skill directory.
+/// Prefers SKILL.md frontmatter; falls back to folder name + plugin.json description.
+fn extract_skill_info(skill_dir: &Path, repo_dir: &Path) -> (String, Option<String>) {
+    let skill_md = skill_dir.join("SKILL.md");
+    if skill_md.exists() {
+        if let Some((name, desc)) = parse_skill_md(&skill_md) {
+            return (name, desc);
+        }
+    }
+    // Fallback: folder name + optional plugin.json description
+    let name = skill_dir
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
+    let desc = read_plugin_description(repo_dir);
+    (name, desc)
+}
+
 /// Count skill directories in a repo: checks both `skills/*` and root-level subdirectories.
 fn count_skills_in_repo(repo_dir: &Path) -> usize {
     let mut count = 0usize;
-    // 1) skills/* and known sub-locations
-    for base in [
-        "skills",
-        "skills/.curated",
-        "skills/.experimental",
-        "skills/.system",
-    ] {
+    // 1) skills/*, .claude/skills/*, and known sub-locations
+    for base in SKILL_SCAN_BASES {
         let base_dir = repo_dir.join(base);
         if let Ok(rd) = std::fs::read_dir(&base_dir) {
             for entry in rd.flatten() {
                 let p = entry.path();
-                if p.is_dir() && p.join("SKILL.md").exists() {
+                if is_skill_dir(&p) {
                     count += 1;
                 }
             }
@@ -673,14 +726,8 @@ pub fn list_git_skills<R: tauri::Runtime>(
     // If user provided a folder URL, treat it as a single candidate.
     if let Some(subpath) = &parsed.subpath {
         let dir = repo_dir.join(subpath);
-        if dir.is_dir() && dir.join("SKILL.md").exists() {
-            let (name, desc) = parse_skill_md(&dir.join("SKILL.md")).unwrap_or((
-                dir.file_name()
-                    .unwrap_or_default()
-                    .to_string_lossy()
-                    .to_string(),
-                None,
-            ));
+        if dir.is_dir() && (dir.join("SKILL.md").exists() || is_claude_skill_dir(&dir)) {
+            let (name, desc) = extract_skill_info(&dir, &repo_dir);
             out.push(GitSkillCandidate {
                 name,
                 description: desc,
@@ -701,17 +748,10 @@ pub fn list_git_skills<R: tauri::Runtime>(
         });
     }
 
-    // Scan known sub-locations: skills/*, skills/.curated/*, etc.
+    // Scan known sub-locations: skills/*, .claude/skills/*, skills/.curated/*, etc.
     // AND root-level subdirectories (fixes #18: repos without a skills/ parent).
-    let scan_bases: Vec<std::path::PathBuf> = [
-        "skills",
-        "skills/.curated",
-        "skills/.experimental",
-        "skills/.system",
-    ]
-    .iter()
-    .map(|b| repo_dir.join(b))
-    .collect();
+    let scan_bases: Vec<std::path::PathBuf> =
+        SKILL_SCAN_BASES.iter().map(|b| repo_dir.join(b)).collect();
 
     // Collect all directories to scan: known bases + root-level subdirs
     let mut dirs_to_scan: Vec<std::path::PathBuf> = Vec::new();
@@ -753,20 +793,10 @@ pub fn list_git_skills<R: tauri::Runtime>(
         if let Ok(rd) = std::fs::read_dir(base_dir) {
             for entry in rd.flatten() {
                 let p = entry.path();
-                if !p.is_dir() {
+                if !is_skill_dir(&p) {
                     continue;
                 }
-                let skill_md = p.join("SKILL.md");
-                if !skill_md.exists() {
-                    continue;
-                }
-                let (name, desc) = parse_skill_md(&skill_md).unwrap_or((
-                    p.file_name()
-                        .unwrap_or_default()
-                        .to_string_lossy()
-                        .to_string(),
-                    None,
-                ));
+                let (name, desc) = extract_skill_info(&p, &repo_dir);
                 let rel = p
                     .strip_prefix(&repo_dir)
                     .unwrap_or(&p)
@@ -827,12 +857,7 @@ pub fn list_local_skills(base_path: &Path) -> Result<Vec<LocalSkillCandidate>> {
         }
     }
 
-    for base in [
-        "skills",
-        "skills/.curated",
-        "skills/.experimental",
-        "skills/.system",
-    ] {
+    for base in SKILL_SCAN_BASES {
         let base_dir = base_path.join(base);
         if !base_dir.exists() {
             continue;
@@ -849,7 +874,47 @@ pub fn list_local_skills(base_path: &Path) -> Result<Vec<LocalSkillCandidate>> {
                     .unwrap_or(&p)
                     .to_string_lossy()
                     .to_string();
-                if !skill_md.exists() {
+                if skill_md.exists() {
+                    match parse_skill_md_with_reason(&skill_md) {
+                        Ok((name, desc)) => {
+                            out.push(LocalSkillCandidate {
+                                name,
+                                description: desc,
+                                subpath: rel,
+                                valid: true,
+                                reason: None,
+                            });
+                        }
+                        Err(reason) => {
+                            out.push(LocalSkillCandidate {
+                                name: p
+                                    .file_name()
+                                    .unwrap_or_default()
+                                    .to_string_lossy()
+                                    .to_string(),
+                                description: None,
+                                subpath: rel,
+                                valid: false,
+                                reason: Some(reason.to_string()),
+                            });
+                        }
+                    }
+                } else if is_claude_skill_dir(&p) {
+                    // .claude/skills/* directories are valid without SKILL.md
+                    let name = p
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .to_string();
+                    let desc = read_plugin_description(base_path);
+                    out.push(LocalSkillCandidate {
+                        name,
+                        description: desc,
+                        subpath: rel,
+                        valid: true,
+                        reason: None,
+                    });
+                } else {
                     out.push(LocalSkillCandidate {
                         name: p
                             .file_name()
@@ -861,31 +926,6 @@ pub fn list_local_skills(base_path: &Path) -> Result<Vec<LocalSkillCandidate>> {
                         valid: false,
                         reason: Some("missing_skill_md".to_string()),
                     });
-                    continue;
-                }
-                match parse_skill_md_with_reason(&skill_md) {
-                    Ok((name, desc)) => {
-                        out.push(LocalSkillCandidate {
-                            name,
-                            description: desc,
-                            subpath: rel,
-                            valid: true,
-                            reason: None,
-                        });
-                    }
-                    Err(reason) => {
-                        out.push(LocalSkillCandidate {
-                            name: p
-                                .file_name()
-                                .unwrap_or_default()
-                                .to_string_lossy()
-                                .to_string(),
-                            description: None,
-                            subpath: rel,
-                            valid: false,
-                            reason: Some(reason.to_string()),
-                        });
-                    }
                 }
             }
         }
