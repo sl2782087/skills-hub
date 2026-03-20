@@ -48,14 +48,18 @@ pub fn fetch_featured_skills(store: &SkillStore) -> Result<Vec<FeaturedSkill>> {
 fn fetch_featured_skills_inner(url: &str, store: &SkillStore) -> Result<Vec<FeaturedSkill>> {
     if let Ok(json_str) = fetch_from_url(url) {
         if let Ok(skills) = parse_and_filter(&json_str) {
-            let _ = store.set_setting(CACHE_KEY, &json_str);
-            return Ok(skills);
+            if !skills.is_empty() {
+                let _ = store.set_setting(CACHE_KEY, &json_str);
+                return Ok(skills);
+            }
         }
     }
     // Fallback to cache
     if let Ok(Some(cached)) = store.get_setting(CACHE_KEY) {
         if let Ok(skills) = parse_and_filter(&cached) {
-            return Ok(skills);
+            if !skills.is_empty() {
+                return Ok(skills);
+            }
         }
     }
     // Fallback to bundled JSON
