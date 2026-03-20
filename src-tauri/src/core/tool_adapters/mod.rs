@@ -29,6 +29,7 @@ pub enum ToolId {
     OpenHands,
     Pi,
     Qoder,
+    QoderWork,
     QwenCode,
     Trae,
     TraeCn,
@@ -75,6 +76,7 @@ impl ToolId {
             ToolId::OpenHands => "openhands",
             ToolId::Pi => "pi",
             ToolId::Qoder => "qoder",
+            ToolId::QoderWork => "qoderwork",
             ToolId::QwenCode => "qwen_code",
             ToolId::Trae => "trae",
             ToolId::TraeCn => "trae_cn",
@@ -288,6 +290,13 @@ pub fn default_tool_adapters() -> Vec<ToolAdapter> {
             // add-skill global path: ~/.qoder/skills/
             relative_skills_dir: ".qoder/skills",
             relative_detect_dir: ".qoder",
+        },
+        ToolAdapter {
+            id: ToolId::QoderWork,
+            display_name: "QoderWork",
+            // add-skill global path: ~/.qoderwork/skills/
+            relative_skills_dir: ".qoderwork/skills",
+            relative_detect_dir: ".qoderwork",
         },
         ToolAdapter {
             id: ToolId::QwenCode,
