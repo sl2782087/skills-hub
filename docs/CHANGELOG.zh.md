@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-03-21
+
+### 新增
+- **Frontmatter 元数据表格**：包含 YAML frontmatter 的 Markdown 文件在技能详情页顶部以 GitHub 风格的表格展示元数据。
+
 ## [0.4.0] - 2026-03-20
 
 ### 新增
