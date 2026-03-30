@@ -5,7 +5,7 @@ use serde::Deserialize;
 use super::skill_store::SkillStore;
 
 const FEATURED_SKILLS_URL: &str =
-    "https://raw.githubusercontent.com/qufei1993/skills-hub/main/featured-skills.json";
+    "https://raw.githubusercontent.com/qufei1993/skillverse/main/featured-skills.json";
 
 const CACHE_KEY: &str = "featured_skills_cache";
 
@@ -74,7 +74,7 @@ fn fetch_from_url(url: &str) -> Result<String> {
 
     let body = client
         .get(url)
-        .header("User-Agent", "skills-hub")
+        .header("User-Agent", "skillverse")
         .send()
         .context("fetch featured skills")?
         .error_for_status()

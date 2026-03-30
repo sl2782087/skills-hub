@@ -576,7 +576,7 @@ fn should_compute_content_hash() -> bool {
     if cfg!(debug_assertions) {
         return true;
     }
-    std::env::var("SKILLS_HUB_COMPUTE_HASH")
+    std::env::var("SKILLVERSE_COMPUTE_HASH")
         .ok()
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
         .unwrap_or(false)
@@ -613,7 +613,7 @@ pub fn update_managed_skill_from_source<R: tauri::Runtime>(
     let now = now_ms();
 
     // Build new content in a sibling temp dir for safe swap.
-    let staging_dir = central_parent.join(format!(".skills-hub-update-{}", Uuid::new_v4()));
+    let staging_dir = central_parent.join(format!(".skillverse-update-{}", Uuid::new_v4()));
     if staging_dir.exists() {
         let _ = std::fs::remove_dir_all(&staging_dir);
     }
@@ -1169,12 +1169,12 @@ fn clone_to_cache<R: tauri::Runtime>(
         .path()
         .app_cache_dir()
         .context("failed to resolve app cache dir")?;
-    let cache_root = cache_dir.join("skills-hub-git-cache");
+    let cache_root = cache_dir.join("skillverse-git-cache");
     std::fs::create_dir_all(&cache_root)
         .with_context(|| format!("failed to create cache dir {:?}", cache_root))?;
 
     let repo_dir = cache_root.join(repo_cache_key(clone_url, branch));
-    let meta_path = repo_dir.join(".skills-hub-cache.json");
+    let meta_path = repo_dir.join(".skillverse-cache.json");
 
     let lock = GIT_CACHE_LOCK.get_or_init(|| Mutex::new(()));
     let _guard = lock.lock().unwrap_or_else(|err| err.into_inner());

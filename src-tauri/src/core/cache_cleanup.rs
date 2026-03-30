@@ -7,8 +7,8 @@ use tauri::Manager;
 
 use super::skill_store::SkillStore;
 
-const CACHE_DIR_NAME: &str = "skills-hub-git-cache";
-const CACHE_META_FILE: &str = ".skills-hub-cache.json";
+const CACHE_DIR_NAME: &str = "skillverse-git-cache";
+const CACHE_META_FILE: &str = ".skillverse-cache.json";
 pub const GIT_CACHE_CLEANUP_DAYS_KEY: &str = "git_cache_cleanup_days";
 pub const DEFAULT_GIT_CACHE_CLEANUP_DAYS: i64 = 30;
 const MAX_GIT_CACHE_CLEANUP_DAYS: i64 = 3650;

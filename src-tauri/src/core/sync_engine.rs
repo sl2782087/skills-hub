@@ -193,7 +193,7 @@ fn should_skip_copy(entry: &walkdir::DirEntry) -> bool {
 }
 
 pub fn copy_dir_recursive(source: &Path, target: &Path) -> Result<()> {
-    let profile = std::env::var("SKILLS_HUB_PROFILE_IO")
+    let profile = std::env::var("SKILLVERSE_PROFILE_IO")
         .ok()
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
         .unwrap_or(false);

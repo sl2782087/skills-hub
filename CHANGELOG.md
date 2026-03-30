@@ -26,8 +26,8 @@ All notable changes to this project will be documented in this file.
 ## [0.4.0] - 2026-03-20
 
 ### Added
-- **In-app update check**: Check for updates directly within Settings, download and install without leaving the app ([#33](https://github.com/qufei1993/skills-hub/issues/33)).
-- **QoderWork tool adapter**: Support for QoderWork desktop AI agent (`~/.qoderwork/skills/`) ([#34](https://github.com/qufei1993/skills-hub/issues/34)).
+- **In-app update check**: Check for updates directly within Settings, download and install without leaving the app ([#33](https://github.com/qufei1993/skillverse/issues/33)).
+- **QoderWork tool adapter**: Support for QoderWork desktop AI agent (`~/.qoderwork/skills/`) ([#34](https://github.com/qufei1993/skillverse/issues/34)).
 
 ### Changed
 - **Settings promoted to full page**: Settings moved from a modal dialog to a dedicated page view, consistent with My Skills / Explore navigation pattern.
@@ -48,12 +48,12 @@ All notable changes to this project will be documented in this file.
 - **MoltBot tool adapter**: Added standalone MoltBot tool support after OpenClaw rename/split.
 
 ### Fixed
-- Git install deriving skill name as "skills" when URL points to a `skills/` subdirectory, causing duplicated sync paths ([#28](https://github.com/qufei1993/skills-hub/issues/28)).
+- Git install deriving skill name as "skills" when URL points to a `skills/` subdirectory, causing duplicated sync paths ([#28](https://github.com/qufei1993/skillverse/issues/28)).
 - GitHub API rate-limit errors now display the exact reset time instead of a generic message.
-- Windows "Access Denied" OS error 5 when syncing to tools ([#20](https://github.com/qufei1993/skills-hub/issues/20)).
-- Git repo directory structures not correctly recognized as skills ([#18](https://github.com/qufei1993/skills-hub/issues/18), [#8](https://github.com/qufei1993/skills-hub/issues/8)).
-- Repos using `.claude/skills/` directory format not detected ([#27](https://github.com/qufei1993/skills-hub/issues/27)).
-- OpenClaw path updated from `.moltbot/skills` to `.openclaw/skills` ([#29](https://github.com/qufei1993/skills-hub/issues/29)).
+- Windows "Access Denied" OS error 5 when syncing to tools ([#20](https://github.com/qufei1993/skillverse/issues/20)).
+- Git repo directory structures not correctly recognized as skills ([#18](https://github.com/qufei1993/skillverse/issues/18), [#8](https://github.com/qufei1993/skillverse/issues/8)).
+- Repos using `.claude/skills/` directory format not detected ([#27](https://github.com/qufei1993/skillverse/issues/27)).
+- OpenClaw path updated from `.moltbot/skills` to `.openclaw/skills` ([#29](https://github.com/qufei1993/skillverse/issues/29)).
 
 ### Changed
 - My Skills list: tool badges now only show synced tools, collapsing to `+N more` beyond 5.
@@ -63,7 +63,7 @@ All notable changes to this project will be documented in this file.
 ## [0.2.0] - 2026-02-01
 
 ### Added
-- **Windows platform support**: Full support for Windows build and release (thanks @jrtxio [PR#6](https://github.com/qufei1993/skills-hub/pull/6)).
+- **Windows platform support**: Full support for Windows build and release (thanks @jrtxio [PR#6](https://github.com/qufei1993/skillverse/pull/6)).
 - Support and display for many new tools (e.g., Kimi Code CLI, Augment, OpenClaw, Cline, CodeBuddy, Command Code, Continue, Crush, Junie, iFlow CLI, Kiro CLI, Kode, MCPJam, Mistral Vibe, Mux, OpenClaude IDE, OpenHands, Pi, Qoder, Qwen Code, Trae/Trae CN, Zencoder, Neovate, Pochi, AdaL).
 - UI confirmation and linked selection for tools that share the same global skills directory.
 - Local import multi-skill discovery aligned with Git rules, with a selection list and invalid-item reasons.
@@ -86,7 +86,7 @@ All notable changes to this project will be documented in this file.
 ## [0.1.0] - 2026-01-25
 
 ### Added
-- Initial release of Skills Hub desktop app (Tauri + React).
+- Initial release of Skillverse desktop app (Tauri + React).
 - Central repository for Skills; sync to multiple AI coding tools (symlink/junction preferred, copy fallback).
 - Local import from folders.
 - Git import via repository URL or folder URL (`/tree/<branch>/<path>`), with multi-skill selection and batch install.

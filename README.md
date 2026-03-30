@@ -123,7 +123,7 @@ cargo test
 
 ## FAQ / Notes
 
-- Where are skills stored? The Skills storage path defaults to `~/.skillshub` (configurable in Settings), and can be opened from app menu (`Features`) or tray menu.
+- Where are skills stored? The Skills storage path defaults to `~/.skillverse` (configurable in Settings), and can be opened from app menu (`Features`) or tray menu.
 - Why is Cursor sync always copy? Cursor currently does not support symlink/junction-based skill directories, so Skillverse forces directory copy when syncing to Cursor.
 - Why does sync sometimes fall back to copy? Skillverse prefers symlink/junction, but on some systems (especially Windows) symlinks may be restricted; in that case it falls back to directory copy.
 - What does `TARGET_EXISTS|...` mean? The target folder already exists and the operation did not overwrite it (default is non-destructive). Remove the existing folder or retry with the appropriate overwrite flow.

@@ -26,8 +26,8 @@
 ## [0.4.0] - 2026-03-20
 
 ### 新增
-- **应用内检查更新**：在设置页内直接检查新版本，支持下载安装，无需手动访问 GitHub Releases（[#33](https://github.com/qufei1993/skills-hub/issues/33)）。
-- **QoderWork 工具适配**：新增 QoderWork 桌面 AI 代理支持（`~/.qoderwork/skills/`）（[#34](https://github.com/qufei1993/skills-hub/issues/34)）。
+- **应用内检查更新**：在设置页内直接检查新版本，支持下载安装，无需手动访问 GitHub Releases（[#33](https://github.com/qufei1993/skillverse/issues/33)）。
+- **QoderWork 工具适配**：新增 QoderWork 桌面 AI 代理支持（`~/.qoderwork/skills/`）（[#34](https://github.com/qufei1993/skillverse/issues/34)）。
 
 ### 变更
 - **设置页面化**：设置从模态弹窗升级为独立页面视图，与 My Skills / Explore 导航风格一致。
@@ -48,12 +48,12 @@
 - **MoltBot 工具适配**：OpenClaw 更名拆分后新增独立的 MoltBot 工具支持。
 
 ### 修复
-- Git 安装时 skill 名称为 "skills" 导致同步路径重复（[#28](https://github.com/qufei1993/skills-hub/issues/28)）。
+- Git 安装时 skill 名称为 "skills" 导致同步路径重复（[#28](https://github.com/qufei1993/skillverse/issues/28)）。
 - GitHub API 限流错误未提示重置时间，现在显示具体重置时间。
-- Windows 同步时拒绝访问 OS error 5（[#20](https://github.com/qufei1993/skills-hub/issues/20)）。
-- Git 仓库目录结构无法被正确识别为 skill（[#18](https://github.com/qufei1993/skills-hub/issues/18)、[#8](https://github.com/qufei1993/skills-hub/issues/8)）。
-- 不支持 `.claude/skills/` 目录格式的仓库（[#27](https://github.com/qufei1993/skills-hub/issues/27)）。
-- OpenClaw 路径更新（`.moltbot/skills` → `.openclaw/skills`）（[#29](https://github.com/qufei1993/skills-hub/issues/29)）。
+- Windows 同步时拒绝访问 OS error 5（[#20](https://github.com/qufei1993/skillverse/issues/20)）。
+- Git 仓库目录结构无法被正确识别为 skill（[#18](https://github.com/qufei1993/skillverse/issues/18)、[#8](https://github.com/qufei1993/skillverse/issues/8)）。
+- 不支持 `.claude/skills/` 目录格式的仓库（[#27](https://github.com/qufei1993/skillverse/issues/27)）。
+- OpenClaw 路径更新（`.moltbot/skills` → `.openclaw/skills`）（[#29](https://github.com/qufei1993/skillverse/issues/29)）。
 
 ### 变更
 - My Skills 列表优化：工具徽章只显示已同步的工具，超过 5 个折叠为 `+N more`。
@@ -62,7 +62,7 @@
 
 ## [0.2.0] - 2026-02-01
 ### 新增
-- **Windows 平台支持**：支持 Windows 构建与发布（感谢 @jrtxio [PR#6](https://github.com/qufei1993/skills-hub/pull/6)）。
+- **Windows 平台支持**：支持 Windows 构建与发布（感谢 @jrtxio [PR#6](https://github.com/qufei1993/skillverse/pull/6)）。
 - 新增多款工具适配与显示（如 Kimi Code CLI、Augment、OpenClaw、Cline、CodeBuddy、Command Code、Continue、Crush、Junie、iFlow CLI、Kiro CLI、Kode、MCPJam、Mistral Vibe、Mux、OpenClaude IDE、OpenHands、Pi、Qoder、Qwen Code、Trae/Trae CN、Zencoder、Neovate、Pochi、AdaL 等）。
 - 前端新增共享技能目录提示与联动选择：同一全局 skills 目录的工具勾选/同步/取消同步会一起生效，并弹窗确认。
 - 本地导入对齐 Git 规则的 multi-skill 发现，支持批量选择并展示无效项原因。
@@ -85,7 +85,7 @@
 ## [0.1.0] - 2026-01-24
 
 ### 新增
-- Skills Hub 桌面应用（Tauri + React）初始发布。
+- Skillverse 桌面应用（Tauri + React）初始发布。
 - Skills 中心仓库：统一托管并同步到多种 AI 编程工具（优先 symlink/junction，失败回退 copy）。
 - 本地导入：支持从本地文件夹导入 Skill。
 - Git 导入：支持仓库 URL/文件夹 URL（`/tree/<branch>/<path>`），支持多 Skill 候选选择与批量安装。

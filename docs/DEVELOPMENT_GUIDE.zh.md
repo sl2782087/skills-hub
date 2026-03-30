@@ -1,11 +1,11 @@
-# Skills Hub 开发与 AI 协作指南
+# Skillverse 开发与 AI 协作指南
 
 > 面向本项目开发者与 AI 编程助手（Cursor / Claude Code / Codex 等）的统一文档。  
 > 目标：进入项目后 10 分钟内建立整体认知，能快速定位代码并安全迭代。
 
 ## 1. 项目定位
 
-Skills Hub 是一个跨平台桌面应用（Tauri 2 + React 19），用于统一管理 Agent Skills，并将技能同步到多个 AI 工具目录，实现：
+Skillverse 是一个跨平台桌面应用（Tauri 2 + React 19），用于统一管理 Agent Skills，并将技能同步到多个 AI 工具目录，实现：
 
 - Install once, sync everywhere
 - 统一可视化管理：技能、来源、同步状态
@@ -45,7 +45,7 @@ npm run check
 ## 3. 仓库目录速览
 
 ```text
-skills-hub/
+skillverse/
 ├── src/                     # React 前端
 │   ├── App.tsx              # 状态中心与主业务编排
 │   ├── App.css              # 全局组件样式
@@ -83,7 +83,7 @@ skills-hub/
 ### 4.3 核心业务闭环
 
 1. 导入 skill（local/git）
-2. 写入中心仓库（默认 `~/.skillshub`）
+2. 写入中心仓库（默认 `~/.skillverse`）
 3. 写入 DB（`skills` + `skill_targets`）
 4. 同步到目标工具目录（symlink/junction/copy）
 5. UI 刷新托管列表与目标状态
@@ -225,7 +225,7 @@ skills-hub/
 ### 12.3 高质量提示词模板
 
 ```text
-你在修改 Skills Hub（Tauri + React + Rust）项目。
+你在修改 Skillverse（Tauri + React + Rust）项目。
 请按以下要求实现：
 1) 先给出改动方案与涉及文件
 2) 仅修改必要文件，不做无关重构

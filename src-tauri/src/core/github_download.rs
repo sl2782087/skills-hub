@@ -97,7 +97,7 @@ fn fetch_contents_response(
     let url = github_contents_url(owner, repo, path, branch);
     let mut req = client
         .get(&url)
-        .header("User-Agent", "skills-hub")
+        .header("User-Agent", "skillverse")
         .header("Accept", "application/vnd.github.v3+json");
     if let Some(t) = token {
         req = req.header("Authorization", format!("Bearer {}", t));
@@ -263,7 +263,7 @@ fn download_file_bytes(
         .download_url
         .as_deref()
         .ok_or_else(|| anyhow::anyhow!("missing download_url for {}", item.path))?;
-    let mut file_req = client.get(download_url).header("User-Agent", "skills-hub");
+    let mut file_req = client.get(download_url).header("User-Agent", "skillverse");
     if let Some(t) = token {
         file_req = file_req.header("Authorization", format!("Bearer {}", t));
     }

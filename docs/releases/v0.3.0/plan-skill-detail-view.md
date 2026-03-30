@@ -6,7 +6,7 @@
 
 ### 设计原型
 
-原型图位于 `docs/skills_hub_v2_design.html` 的 Screen 5A–5D 部分。
+原型图位于 `docs/skillverse_v2_design.html` 的 Screen 5A–5D 部分。
 
 ### 交互流程
 

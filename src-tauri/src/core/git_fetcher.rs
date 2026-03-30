@@ -30,7 +30,7 @@ pub fn clone_or_pull(
                 return Ok(head);
             }
             Err(err) => {
-                let allow_fallback = std::env::var("SKILLS_HUB_ALLOW_LIBGIT2_FALLBACK")
+                let allow_fallback = std::env::var("SKILLVERSE_ALLOW_LIBGIT2_FALLBACK")
                     .ok()
                     .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
                     .unwrap_or(false);
@@ -43,12 +43,12 @@ pub fn clone_or_pull(
                 );
                 if !allow_fallback {
                     anyhow::bail!(
-                        "git 命令执行失败（为避免卡死，已停止并不再回退到内置 git）。请检查系统 git/网络/代理；或设置环境变量 SKILLS_HUB_ALLOW_LIBGIT2_FALLBACK=1 允许回退。\n{:#}",
+                        "git 命令执行失败（为避免卡死，已停止并不再回退到内置 git）。请检查系统 git/网络/代理；或设置环境变量 SKILLVERSE_ALLOW_LIBGIT2_FALLBACK=1 允许回退。\n{:#}",
                         err
                     );
                 }
                 log::warn!(
-                    "[git_fetcher] falling back to libgit2 (SKILLS_HUB_ALLOW_LIBGIT2_FALLBACK=1)"
+                    "[git_fetcher] falling back to libgit2 (SKILLVERSE_ALLOW_LIBGIT2_FALLBACK=1)"
                 );
             }
         }
@@ -91,7 +91,7 @@ pub fn clone_or_pull(
 }
 
 fn git_timeout() -> Duration {
-    let secs = std::env::var("SKILLS_HUB_GIT_TIMEOUT_SECS")
+    let secs = std::env::var("SKILLVERSE_GIT_TIMEOUT_SECS")
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(300);
@@ -99,7 +99,7 @@ fn git_timeout() -> Duration {
 }
 
 fn git_fetch_timeout() -> Duration {
-    let secs = std::env::var("SKILLS_HUB_GIT_FETCH_TIMEOUT_SECS")
+    let secs = std::env::var("SKILLVERSE_GIT_FETCH_TIMEOUT_SECS")
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .unwrap_or(180);
@@ -112,7 +112,7 @@ fn resolve_git_bin() -> Option<String> {
     GIT_BIN
         .get_or_init(|| {
             // Allow overriding from environment for debugging / enterprise setups.
-            for key in ["SKILLS_HUB_GIT_BIN", "SKILLS_HUB_GIT_PATH"] {
+            for key in ["SKILLVERSE_GIT_BIN", "SKILLVERSE_GIT_PATH"] {
                 if let Ok(v) = std::env::var(key) {
                     let v = v.trim().to_string();
                     if !v.is_empty() && git_bin_works(&v) {
@@ -195,7 +195,7 @@ fn run_cmd_with_timeout(
                 .map(|out| String::from_utf8_lossy(&out.stderr).to_string())
                 .unwrap_or_default();
             anyhow::bail!(
-                "git 操作超时（{}s）。请检查网络/代理是否可访问 GitHub；也可设置环境变量 SKILLS_HUB_GIT_TIMEOUT_SECS 增大超时。\n{}",
+                "git 操作超时（{}s）。请检查网络/代理是否可访问 GitHub；也可设置环境变量 SKILLVERSE_GIT_TIMEOUT_SECS 增大超时。\n{}",
                 timeout.as_secs(),
                 stderr.trim()
             );

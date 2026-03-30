@@ -6,7 +6,7 @@
 
 ## 设计稿
 
-`docs/skills_hub_v2_design.html` — 包含 4 个屏幕的完整交互设计。
+`docs/skillverse_v2_design.html` — 包含 4 个屏幕的完整交互设计。
 
 ## 改动概览
 
