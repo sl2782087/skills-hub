@@ -41,7 +41,7 @@ const SkillsList = ({
   onUpdateSkill,
   onDeleteSkill,
   onToggleTool,
-  // onSyncNow, // temporarily commented out until Task 6 adds prop to SkillCard
+  onSyncNow,
   onOpenDetail,
   t,
 }: SkillsListProps) => {
@@ -100,7 +100,7 @@ const SkillsList = ({
           onUpdate={onUpdateSkill}
           onDelete={onDeleteSkill}
           onToggleTool={onToggleTool}
-          // onSyncNow={onSyncNow} // temporarily commented out until Task 6 adds prop to SkillCard
+          onSyncNow={onSyncNow}
           onOpenDetail={onOpenDetail}
           t={t}
         />

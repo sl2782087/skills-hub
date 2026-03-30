@@ -1,5 +1,5 @@
 import { memo, useState, type MouseEvent } from 'react'
-import { Box, Copy, Folder, Github, RefreshCw, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, Copy, ExternalLink, Github, RefreshCw, Trash2 } from 'lucide-react'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { toast } from 'sonner'
 import type { TFunction } from 'i18next'
@@ -21,11 +21,32 @@ type SkillCardProps = {
   onUpdate: (skill: ManagedSkill) => void
   onDelete: (skillId: string) => void
   onToggleTool: (skill: ManagedSkill, toolId: string) => void
+  onSyncNow: (skill: ManagedSkill) => void
   onOpenDetail: (skill: ManagedSkill) => void
   t: TFunction
 }
 
-const MAX_VISIBLE_BADGES = 5
+const AVATAR_COLORS: [string, string][] = [
+  ['#6366f1', '#8b5cf6'],
+  ['#06b6d4', '#3b82f6'],
+  ['#10b981', '#14b8a6'],
+  ['#f59e0b', '#ef4444'],
+  ['#ec4899', '#a855f7'],
+]
+
+function getAvatarColors(name: string): [string, string] {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!
+}
+
+function getInitials(name: string): string {
+  const words = name.replace(/[-_]/g, ' ').split(' ').filter(Boolean)
+  if (words.length >= 2) return (words[0]![0]! + words[1]![0]!).toUpperCase()
+  return name.slice(0, 2).toUpperCase()
+}
+
+const MAX_AVATAR_PREVIEW = 3
 
 const SkillCard = ({
   skill,
@@ -38,20 +59,25 @@ const SkillCard = ({
   onUpdate,
   onDelete,
   onToggleTool,
+  onSyncNow,
   onOpenDetail,
   t,
 }: SkillCardProps) => {
+  const [expanded, setExpanded] = useState(false)
   const typeKey = skill.source_type.toLowerCase()
-  const iconNode = typeKey.includes('git') ? (
-    <Github size={20} />
-  ) : typeKey.includes('local') ? (
-    <Folder size={20} />
-  ) : (
-    <Box size={20} />
-  )
+  const isGit = typeKey.includes('git')
   const github = getGithubInfo(skill.source_ref)
   const githubOpenUrl = getGithubOpenUrl(skill)
   const copyValue = (github?.href ?? skill.source_ref ?? '').trim()
+  const [c1, c2] = getAvatarColors(skill.name)
+  const initials = getInitials(skill.name)
+
+  const syncedToolIds = new Set(skill.targets.map((tgt) => tgt.tool))
+  const syncedTools = installedTools.filter((t) => syncedToolIds.has(t.id))
+  const allSynced = installedTools.length > 0 && syncedTools.length === installedTools.length
+  const statusClass = syncedTools.length === 0 ? 'none' : allSynced ? 'full' : 'partial'
+  const previewTools = syncedTools.slice(0, MAX_AVATAR_PREVIEW)
+  const extraCount = syncedTools.length - MAX_AVATAR_PREVIEW
 
   const handleCopy = async () => {
     if (!copyValue) return
@@ -75,145 +101,171 @@ const SkillCard = ({
     })()
   }
 
-  // Split tools into synced and remaining for badge display
-  const syncedTools: { tool: ToolOption; target: (typeof skill.targets)[0] }[] = []
-  const unsyncedTools: ToolOption[] = []
-  for (const tool of installedTools) {
-    const target = skill.targets.find((tgt) => tgt.tool === tool.id)
-    if (target) {
-      syncedTools.push({ tool, target })
-    } else {
-      unsyncedTools.push(tool)
-    }
+  const handleDetailClick = (e: MouseEvent) => {
+    e.stopPropagation()
+    onOpenDetail(skill)
   }
 
-  const [expanded, setExpanded] = useState(false)
-  const needsCollapse = syncedTools.length > MAX_VISIBLE_BADGES
-  const visibleSynced = expanded ? syncedTools : syncedTools.slice(0, MAX_VISIBLE_BADGES)
-  const remainingCount = syncedTools.length - MAX_VISIBLE_BADGES
+  const handleExpandClick = (e: MouseEvent) => {
+    e.stopPropagation()
+    setExpanded((v) => !v)
+  }
 
   return (
-    <div className="skill-card">
-      <div className="skill-icon">{iconNode}</div>
-      <div className="skill-main">
-        <div className="skill-header-row">
+    <div className={`skill-card-v2${expanded ? ' expanded' : ''}`}>
+      {/* Header row */}
+      <div
+        className="skill-card-header"
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            setExpanded((v) => !v)
+          }
+        }}
+      >
+        {/* Avatar */}
+        <div
+          className="skill-avatar"
+          style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+          aria-hidden="true"
+        >
+          {initials}
+        </div>
+
+        {/* Info */}
+        <div className="skill-card-info">
+          <div className="skill-card-name-row">
+            <span className="skill-card-name">{skill.name}</span>
+            <span className={`skill-source-tag ${isGit ? 'git' : 'local'}`}>
+              {isGit ? 'git' : 'local'}
+            </span>
+          </div>
+          <div className="skill-card-meta">
+            {github ? github.label : getSkillSourceLabel(skill)}
+            <span className="meta-dot">·</span>
+            {formatRelative(skill.updated_at)}
+          </div>
+        </div>
+
+        {/* Right: tool preview + status + icon buttons + expand arrow */}
+        <div className="skill-card-right">
+          {previewTools.length > 0 && (
+            <div className="tool-avatar-row">
+              {previewTools.map((tool) => (
+                <div key={tool.id} className="tool-avatar" title={tool.label}>
+                  {tool.label.slice(0, 2).toUpperCase()}
+                </div>
+              ))}
+              {extraCount > 0 && (
+                <div className="tool-avatar extra">+{extraCount}</div>
+              )}
+            </div>
+          )}
+          <span className={`sync-badge ${statusClass}`}>
+            {statusClass === 'full'
+              ? t('skillBadgeSynced')
+              : statusClass === 'partial'
+              ? t('skillBadgePartial', { count: syncedTools.length })
+              : '—'}
+          </span>
           <button
             type="button"
-            className="skill-name clickable"
-            onClick={() => onOpenDetail(skill)}
+            className="skill-card-icon-btn"
+            title={t('skillCardDetail')}
+            aria-label={t('skillCardDetail')}
+            onClick={handleDetailClick}
           >
-            {skill.name}
+            <ExternalLink size={14} />
           </button>
           {githubOpenUrl ? (
             <button
               type="button"
-              className="skill-github-open"
+              className="skill-card-icon-btn"
               title={t('openSkillOnGithub')}
               aria-label={t('openSkillOnGithubAria')}
               onClick={handleOpenGithub}
             >
-              <Github size={18} />
+              <Github size={14} />
             </button>
           ) : null}
+          <button
+            type="button"
+            className="skill-card-expand-btn"
+            aria-label={expanded ? t('collapse') : t('expand')}
+            onClick={handleExpandClick}
+          >
+            {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          </button>
         </div>
-        {skill.description ? (
-          <div className="skill-desc">{skill.description}</div>
-        ) : null}
-        <div className="skill-meta-row">
-          {github ? (
-            <div className="skill-source">
+      </div>
+
+      {/* Sync Panel (expanded) */}
+      {expanded && (
+        <div className="skill-sync-panel">
+          <div className="sync-panel-label">{t('skillSyncPanel')}</div>
+          <div className="sync-tool-grid">
+            {installedTools.map((tool) => {
+              const isSynced = syncedToolIds.has(tool.id)
+              return (
+                <button
+                  key={tool.id}
+                  type="button"
+                  className={`sync-tool-btn${isSynced ? ' active' : ''}`}
+                  onClick={() => void onToggleTool(skill, tool.id)}
+                  disabled={loading}
+                  title={tool.label}
+                >
+                  <span className={`sync-tool-dot${isSynced ? ' active' : ''}`} />
+                  <span className="sync-tool-label">{tool.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          <div className="sync-panel-actions">
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => onSyncNow(skill)}
+              disabled={loading}
+            >
+              <RefreshCw size={13} />
+              {t('syncNow')}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => onUpdate(skill)}
+              disabled={loading}
+            >
+              <RefreshCw size={13} />
+              {t('update')}
+            </button>
+            {copyValue ? (
               <button
-                className="repo-pill copyable"
                 type="button"
-                title={t('copy')}
-                aria-label={t('copy')}
+                className="btn btn-secondary btn-sm"
                 onClick={() => void handleCopy()}
-                disabled={!copyValue}
               >
-                {github.label}
-                <span className="copy-icon" aria-hidden="true">
-                  <Copy size={12} />
-                </span>
+                <Copy size={13} />
+                {t('copy')}
               </button>
-            </div>
-          ) : (
-            <div className="skill-source">
-              <button
-                className="repo-pill copyable"
-                type="button"
-                title={t('copy')}
-                aria-label={t('copy')}
-                onClick={() => void handleCopy()}
-                disabled={!copyValue}
-              >
-                <span className="mono">{getSkillSourceLabel(skill)}</span>
-                <span className="copy-icon" aria-hidden="true">
-                  <Copy size={12} />
-                </span>
-              </button>
-            </div>
-          )}
-          <div className="skill-source time">
-            <span className="dot">•</span>
-            {formatRelative(skill.updated_at)}
+            ) : null}
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              onClick={() => onDelete(skill.id)}
+              disabled={loading}
+            >
+              <Trash2 size={13} />
+              {t('remove')}
+            </button>
           </div>
         </div>
-        <div className={`tool-matrix${!expanded && needsCollapse ? ' collapsed' : ''}`}>
-          {visibleSynced.map(({ tool, target }) => (
-            <button
-              key={`${skill.id}-${tool.id}`}
-              type="button"
-              className="tool-pill active"
-              title={`${tool.label} (${target.mode ?? t('unknown')})`}
-              onClick={() => void onToggleTool(skill, tool.id)}
-            >
-              <span className="status-badge" />
-              {tool.label}
-            </button>
-          ))}
-          {needsCollapse && !expanded ? (
-            <button
-              type="button"
-              className="tool-pill more-badge"
-              onClick={() => setExpanded(true)}
-            >
-              {t('moreTools', { count: remainingCount })}
-            </button>
-          ) : null}
-          {expanded &&
-            unsyncedTools.map((tool) => (
-              <button
-                key={`${skill.id}-${tool.id}`}
-                type="button"
-                className="tool-pill inactive"
-                title={tool.label}
-                onClick={() => void onToggleTool(skill, tool.id)}
-              >
-                {tool.label}
-              </button>
-            ))}
-        </div>
-      </div>
-      <div className="skill-actions-col">
-        <button
-          className="card-btn primary-action"
-          type="button"
-          onClick={() => onUpdate(skill)}
-          disabled={loading}
-          aria-label={t('update')}
-        >
-          <RefreshCw size={16} />
-        </button>
-        <button
-          className="card-btn danger-action"
-          type="button"
-          onClick={() => onDelete(skill.id)}
-          disabled={loading}
-          aria-label={t('remove')}
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
+      )}
     </div>
   )
 }
