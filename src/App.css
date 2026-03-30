@@ -2684,3 +2684,42 @@
   align-items: center;
   gap: 2px;
 }
+
+/* === Filter Bar v2 === */
+.filter-bar-v2 {
+  padding: 16px 24px 0 24px;
+  flex-shrink: 0;
+}
+.filter-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-chips {
+  display: flex;
+  gap: 4px;
+}
+.filter-chip {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.filter-chip:hover {
+  background: var(--accent-soft-bg);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+.filter-chip.active {
+  background: rgba(99, 102, 241, 0.14);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}

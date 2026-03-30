@@ -88,6 +88,10 @@ function App() {
   const updateObjRef = useRef<Update | null>(null) as MutableRefObject<Update | null>
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'updated' | 'name'>('updated')
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'git' | 'local'>('all')
+  const handleSourceFilterChange = useCallback((value: 'all' | 'git' | 'local') => {
+    setSourceFilter(value)
+  }, [])
   const [activeView, setActiveView] = useState<'myskills' | 'explore' | 'detail' | 'settings'>('myskills')
   const [detailSkill, setDetailSkill] = useState<ManagedSkill | null>(null)
   const [addModalTab, setAddModalTab] = useState<'local' | 'git'>('git')
@@ -511,12 +515,14 @@ function App() {
   const visibleSkills = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
     const filtered = managedSkills.filter((skill) => {
-      if (!query) return true
-      return (
+      if (query && !(
         skill.name.toLowerCase().includes(query) ||
         skill.central_path.toLowerCase().includes(query) ||
         skill.source_type.toLowerCase().includes(query)
-      )
+      )) return false
+      if (sourceFilter === 'git') return skill.source_type.toLowerCase().includes('git')
+      if (sourceFilter === 'local') return skill.source_type.toLowerCase().includes('local')
+      return true
     })
     const sorted = [...filtered].sort((a, b) => {
       if (sortBy === 'name') {
@@ -525,7 +531,7 @@ function App() {
       return (b.updated_at ?? 0) - (a.updated_at ?? 0)
     })
     return sorted
-  }, [managedSkills, searchQuery, sortBy])
+  }, [managedSkills, searchQuery, sortBy, sourceFilter])
 
   const [storagePath, setStoragePath] = useState<string>(t('notAvailable'))
   const [gitCacheCleanupDays, setGitCacheCleanupDays] = useState<number>(30)
@@ -1880,9 +1886,13 @@ function App() {
               sortBy={sortBy}
               searchQuery={searchQuery}
               loading={loading}
+              sourceFilter={sourceFilter}
+              managedSkillsCount={managedSkills.length}
+              onSourceFilterChange={handleSourceFilterChange}
               onSortChange={handleSortChange}
               onSearchChange={handleSearchChange}
               onRefresh={handleRefresh}
+              onOpenAdd={handleOpenAdd}
               t={t}
             />
             <SkillsList
